@@ -1,0 +1,239 @@
+#include<iostream>
+#include<string>
+#include<stdlib.h>
+#include<fstream>
+#include<sstream>
+using namespace std;
+
+struct Stu {
+	string id;
+	string name;
+	int EnglishG;
+	int MathG;
+	Stu* next;
+};
+
+void menu() {
+	cout << "***************************" << endl;
+	cout << "  1.添加学生信息" << endl;
+	cout << "  2.保存学生信息到文件" << endl;
+	cout << "  3.学号查找学生" << endl;
+	cout << "  4.按照姓名删除学生" << endl;
+	cout << "  5.按照数学成绩排序" << endl;
+	cout << "  6.根据学号修改英语成绩" << endl;
+	cout << "  7.从文件载入学生信息" << endl;
+	cout << "  8.打印列表" << endl;
+	cout << "  0.退出" << endl;
+	cout << "***************************" << endl;
+}
+
+void Add(Stu* head) {
+	Stu* p = new Stu;
+	p->next = NULL;
+	cout << "请分别输入id，姓名，英语成绩，数学成绩：";
+	cin >> p->id >> p->name >> p->EnglishG >> p->MathG;
+	p->next = head->next;
+	head->next = p;//头插法
+	cout << "添加成功！" << endl;
+	system("pause");
+	system("cls");
+}
+
+void Save(Stu* head) {
+	ofstream outfile("list.txt");//打开文件进行写入
+	Stu* p = head->next;
+	while (p != NULL) {
+		outfile << p->id << "\t" << p->name << "\t" << p->EnglishG << "\t" << p->MathG << endl;
+		p = p->next;
+	}
+	outfile.close();//关闭文件
+	cout << "保存成功！" << endl;
+	system("pause");
+	system("cls");
+}
+
+void Find(Stu* head) {
+	cout << "请输入要查找的学号：";
+	string i;
+	cin >> i;
+	Stu* p = head->next;
+	while (p != NULL) {
+		if (p->id == i) {
+			cout << "找到了！" << endl;
+			cout << p->id << "\t" << p->name << "\t" << p->EnglishG << "\t" << p->MathG << endl;
+			system("pause");
+			system("cls");
+			return;
+		}
+		p = p->next;
+	}
+	cout << "查无此人！" << endl;
+	system("pause");
+	system("cls");
+}
+
+void Delete(Stu* head) {
+	cout << "请输入姓名：" << endl;
+	string n;
+	cin >> n;
+	Stu* p = head->next;
+	Stu* pre = head;
+	while (p != NULL) {
+		if (p->name == n) {
+			pre->next = p->next;
+			cout << "删除成功！" << endl;
+			system("pause");
+			system("cls");
+			return;
+		}
+		pre = pre->next;
+		p = p->next;
+	}
+	cout << "查无此人！" << endl;
+	system("pause");
+	system("cls");
+}
+
+void BubbleSort(Stu* head)
+{
+	int count = 0;//链表结点的个数
+	Stu* last, * p, * pre;
+	p = head;//暂时定义
+	while (p->next != NULL)//计算出结点的个数，与p无关
+	{
+		count++;
+		p = p->next;
+	}
+	for (int i = 0; i < count - 1; i++)//外层循环
+	{
+		p = head->next;//操作数
+		last = p->next;//下一个
+		pre = head;//前一个
+		int num = count - i - 1;//内层循环系数
+		while (num--)//内层循环
+		{
+			if (p->MathG < last->MathG)
+			{
+				p->next = last->next;
+				last->next = p;
+				pre->next = last;
+			}//换后为 pre->last->p
+			//下面三行代码为递推关系，不可单独理解
+			pre = pre->next;
+			p = pre->next;
+			last = p->next;
+		}
+	}
+	cout << "操作完成！" << endl;
+	system("pause");
+	system("cls");
+}
+
+void Chang(Stu* head) {
+	cout << "请输入要修改学生的学号：";
+	string i;
+	cin >> i;
+	Stu* p = head->next;
+	while (p != NULL) {
+		if (p->id == i) {
+			cout << "请输入修改后的英语成绩：";
+			int E;
+			cin >> E;
+			p->EnglishG = E;
+			cout << "修改完成！" << endl;
+			system("pause");
+			system("cls");
+			return;
+		}
+		p = p->next;
+	}
+	cout << "查无此人！" << endl;
+	system("pause");
+	system("cls");
+}
+
+void Print(Stu* head) {
+	Stu* p = head->next;
+	if (p == NULL) cout << "无" << endl;
+	while (p != NULL) {
+		cout << p->id << "\t" << p->name << "\t" << p->EnglishG << "\t" << p->MathG << endl;
+		p = p->next;
+	}
+	system("pause");
+	system("cls");
+}
+
+void Read(Stu* head) {
+	ifstream infile("list.txt");
+	string line;
+	string i, n;
+	int E, M;
+	Stu* pre = head;
+	int flat = 1;
+	if (pre->next != NULL) {
+		cout << "载入可能导致已有数据丢失，是否继续载入（1.是    0.否）：";
+		cin >> flat;
+	}
+	if (flat) {
+		while (getline(infile, line)) {
+			stringstream s(line);
+			s >> i >> n >> E >> M;
+			Stu* p = new Stu;
+			p->id = i;
+			p->name = n;
+			p->EnglishG = E;
+			p->MathG = M;
+			p->next = NULL;
+			pre->next = p;
+			pre = p;
+		}
+		cout << "载入成功！" << endl;
+		system("pause");
+	}
+	system("cls");
+}
+
+enum Chose {
+	add=1,save,_find,_delete,bubblesort,chang,read,print
+};//使用枚举常量使表达更加清晰
+
+int main() {
+	Stu* head = new Stu;
+	//malloc函数后面最好跟着检查是否申请内存失败
+	//if(p == NULL)
+	head->next = NULL;
+	int input;
+	do {
+		menu();
+		cout << "请输入：";
+		cin >> input;
+		switch (input) {
+		case add:
+			Add(head);
+			break;
+		case save:
+			Save(head);
+			break;
+		case _find:
+			Find(head);
+			break;
+		case _delete:
+			Delete(head);
+			break;
+		case bubblesort:
+			BubbleSort(head);
+			break;
+		case chang:
+			Chang(head);
+			break;
+		case read:
+			Read(head);
+			break;
+		case print:
+			Print(head);
+			break;
+		}
+	} while (input);
+	cout << "感谢使用！" << endl;
+	return 0;
+}
